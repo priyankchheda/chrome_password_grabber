@@ -14,25 +14,25 @@ Google Chrome encrypt the password with the help of CryptProtectData function, b
 
 #### Usage
 ```python
-C:\> python PasswordGrabber.py
+C:/> python PasswordGrabber.py
 <website> - <username/email>:<plain_text_password>
-C:\> 
+C:/> 
 ```
 ## C Implementation (Not Working)
 
 It compiled correctly without any error, but the decrypted data was not correct.
 
 ```c
-C:\>gcc -o ChromePasswordGrabber ChromePasswordGrabber.c sqlite3.o -lcrypt32
+C:/>gcc -o ChromePasswordGrabber ChromePasswordGrabber.c sqlite3.o -lcrypt32
 
-C:\>ChromePasswordGrabber.exe
+C:/>ChromePasswordGrabber.exe
 Opened database successfully
 Callback function called: Important Data
 Error Number 57.
 
 Operation done successfully
 
-C:\>
+C:/>
 $
 ```
 
