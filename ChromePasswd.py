@@ -19,8 +19,8 @@ class ChromePasswd(object):
 
     def import_libraries(self):
         if self.target_os == 'Darwin':
-            globals()['AES'] = importlib.import_module('AES', 'Crypto.Cipher')
-            globals()['PBKDF2'] = importlib.import_module('PBKDF2', 'Crypto.Protocol.KDF')
+            globals()['AES'] = importlib.import_module('Crypto.Cipher.AES')
+            globals()['KDF'] = importlib.import_module('Crypto.Protocol.KDF')
             globals()['subprocess'] = importlib.import_module('subprocess')
 
         elif self.target_os == 'Windows':
@@ -41,7 +41,7 @@ class ChromePasswd(object):
         salt = b'saltysalt'
         length = 16
         
-        self.key = PBKDF2(my_pass, salt, length, iterations)
+        self.key = KDF.PBKDF2(my_pass, salt, length, iterations)
         self.dbpath = ( "/Users/{}/Library/Application Support/Google"
                         "/Chrome/Default/".format(getuser()))
         self.decrypt_func = self.mac_decrypt
