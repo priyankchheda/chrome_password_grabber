@@ -4,8 +4,9 @@ from shutil import copy
 import sqlite3
 from os import unlink
 import json
-import importlib
+from importlib import import_module
 import string
+import sys
 
 
 class ChromePasswd(object):
@@ -15,16 +16,38 @@ class ChromePasswd(object):
             self.mac_init()
         elif self.target_os == 'Windows':
             self.win_init()
+        elif self.target_os == 'Linux':
+            self.linux_init()
 
 
     def import_libraries(self):
-        if self.target_os == 'Darwin':
-            globals()['AES'] = importlib.import_module('Crypto.Cipher.AES')
-            globals()['KDF'] = importlib.import_module('Crypto.Protocol.KDF')
-            globals()['subprocess'] = importlib.import_module('subprocess')
+        try:
+            if self.target_os == 'Darwin':
+                globals()['AES'] = import_module('Crypto.Cipher.AES')
+                globals()['KDF'] = import_module('Crypto.Protocol.KDF')
+                globals()['subprocess'] = import_module('subprocess')
 
-        elif self.target_os == 'Windows':
-            globals()['win32crypt'] = importlib.import_module('win32crypt')
+            elif self.target_os == 'Windows':
+                globals()['win32crypt'] = import_module('win32crypt')
+
+            elif self.target_os == 'Linux':
+                globals()['AES'] = import_module('Crypto.Cipher.AES')
+                globals()['KDF'] = import_module('Crypto.Protocol.KDF') 
+        except ImportError as e:
+            print "[-] Error: {}".format(str(e))
+            sys.exit()
+
+
+    def linux_init(self):
+        self.import_libraries()
+        my_pass = 'peanuts'.encode('utf8')
+        iterations = 1
+        salt = b'saltysalt'
+        length = 16
+
+        self.key = KDF.PBKDF2(my_pass, salt, length, iterations)
+        self.dbpath = ( "/home/{}/.config/google-chrome/Default/".format(getuser()))
+        self.decrypt_func = self.nix_decrypt
 
 
     def mac_init(self):
@@ -44,10 +67,10 @@ class ChromePasswd(object):
         self.key = KDF.PBKDF2(my_pass, salt, length, iterations)
         self.dbpath = ( "/Users/{}/Library/Application Support/Google"
                         "/Chrome/Default/".format(getuser()))
-        self.decrypt_func = self.mac_decrypt
+        self.decrypt_func = self.nix_decrypt
 
 
-    def mac_decrypt(self, enc_passwd):
+    def nix_decrypt(self, enc_passwd):
         iv = b' ' * 16
         enc_passwd = enc_passwd[3:]
         cipher = AES.new(self.key, AES.MODE_CBC, IV=iv)
