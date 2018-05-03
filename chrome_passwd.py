@@ -24,6 +24,7 @@ Example:
 	}
 
 TO DO:
+    * Cookie support
     * Update database Password directly
 
 """
