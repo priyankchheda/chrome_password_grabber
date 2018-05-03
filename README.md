@@ -53,8 +53,7 @@ Encryption Scheme: AES-128 CBC with a constant salt and constant iterations. The
 ```
 
 ## Contribute
-Feel free to contribute
-Please Follow PEP8 Guidelines
+Feel free to contribute. Please Follow PEP8 Guidelines.
 
 TO DO:
 * Cookie support
