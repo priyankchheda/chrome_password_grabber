@@ -56,7 +56,7 @@ class ChromeWin:
         """ Windows Decryption Function """
         win32crypt = import_module('win32crypt')
         data = win32crypt.CryptUnprotectData(enc_passwd, None, None, None, 0)
-        return data[1]
+        return data[1].decode('utf8')
 
 
 class ChromeLinux:
