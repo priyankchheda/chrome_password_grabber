@@ -7,6 +7,7 @@ import platform
 import sqlite3
 import string
 import subprocess
+import os
 from getpass import getuser
 from importlib import import_module
 from os import unlink
@@ -22,7 +23,9 @@ class ChromeMac:
         """ Mac Initialization Function """
         my_pass = subprocess.Popen(
             "security find-generic-password -wa 'Chrome'",
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True)
         stdout, _ = my_pass.communicate()
         my_pass = stdout.replace(b'\n', b'')
 
@@ -49,8 +52,16 @@ class ChromeWin:
     """ Decryption class for chrome windows installation """
     def __init__(self):
         """ Windows Initialization Function """
-        self.dbpath = (f"C:\\Users\\{getuser()}\\AppData\\Local\\Google"
-                       "\\Chrome\\User Data\\Default\\")
+        # search the genral chrome version path
+        win_path = f"C:\\Users\\{getuser()}\\AppData\\Local\\Google" "\\{chrome}\\User Data\\Default\\"
+        win_chrome_ver = [
+            item for item in
+            ['chrome', 'chrome dev', 'chrome beta', 'chrome canary']
+            if os.path.exists(win_path.format(chrome=item))
+        ]
+        self.dbpath = win_path.format(chrome=''.join(win_chrome_ver))
+        # self.dbpath = (f"C:\\Users\\{getuser()}\\AppData\\Local\\Google"
+        #                "\\Chrome\\User Data\\Default\\")
 
     def decrypt_func(self, enc_passwd):
         """ Windows Decryption Function """
