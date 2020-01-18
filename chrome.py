@@ -1,7 +1,7 @@
 """ Get unencrypted 'Saved Password' from Google Chrome
     Supported platform: Mac, Linux and Windows
 """
-
+import secretstorage
 import json
 import platform
 import sqlite3
@@ -75,6 +75,12 @@ class ChromeLinux:
     def __init__(self):
         """ Linux Initialization Function """
         my_pass = 'peanuts'.encode('utf8')
+        bus = secretstorage.dbus_init()
+        collection = secretstorage.get_default_collection(bus)
+        for item in collection.get_all_items():
+            if item.get_label() == 'Chrome Safe Storage':
+                my_pass = item.get_secret()
+                break
         iterations = 1
         salt = b'saltysalt'
         length = 16
