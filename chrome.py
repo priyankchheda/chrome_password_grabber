@@ -1,17 +1,18 @@
 """ Get unencrypted 'Saved Password' from Google Chrome
     Supported platform: Mac, Linux and Windows
 """
-import secretstorage
 import json
+import os
 import platform
 import sqlite3
 import string
 import subprocess
-import os
 from getpass import getuser
 from importlib import import_module
 from os import unlink
 from shutil import copy
+
+import secretstorage
 
 __author__ = 'Priyank Chheda'
 __email__ = 'p.chheda29@gmail.com'
@@ -141,7 +142,7 @@ class Chrome:
         unlink("Login Data.db")
 
         if prettyprint:
-            print(json.dumps(data, indent=4))
+            return json.dumps(data, indent=4)
         return data
 
 

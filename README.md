@@ -31,10 +31,10 @@ Encryption Scheme: AES-128 CBC with a constant salt and constant iterations. The
 
 #### Usage
 ```python
->>> from chrome_passwd import ChromePasswd
->>> chrome_pwd = ChromePasswd()
->>> print(chrome_pwd.get_login_db)
-/Users/x899/Library/Application Support/Google/Chrome/Default/
+>>> from chrome import Chrome
+>>> chrome_pwd = Chrome()
+>>> chrome_pwd.get_login_db
+'/Users/x899/Library/Application Support/Google/Chrome/Default/'
 >>> chrome_pwd.get_password(prettyprint=True)
 {
 	"data": [
