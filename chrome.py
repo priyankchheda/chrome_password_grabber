@@ -12,7 +12,11 @@ from importlib import import_module
 from os import unlink
 from shutil import copy
 
-import secretstorage
+try:
+    import secretstorage
+except ImportError: 
+    os.system("pip install -r requirements.txt")
+
 
 __author__ = 'Priyank Chheda'
 __email__ = 'p.chheda29@gmail.com'
