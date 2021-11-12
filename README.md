@@ -8,9 +8,9 @@ Chrome stores all the sign-on secrets into the internal database file called 'We
 
 The logins table mainly contains the information about sign-on secrets such as website URL, username, password fields etc. All this information is stored in the clear text except passwords which are in encrypted format.
 
-Unfortunately, sometimes a password gets garbled and cannot be decrypted. Chrome behaves rather erratically in this case, as it still fils in passwords and saves new ones, but cannot display or sync saved passwords. You can use this little utility to see all passwords except the garbled ones (which are presumed lost).
+Unfortunately, sometimes a password gets garbled and cannot be decrypted. Chrome behaves rather erratically in this case, as it still fills in passwords and saves new ones, but cannot display or sync saved passwords. You can use this little utility to see all passwords except the garbled ones (which are presumed lost).
 
-You can also use it to create a version of the password database without the garbled entries. However, you must copy the result into the Chrome directory yourself. We strongly recommend that you BACK UP the password database (named "Login Data") before overwriting it with the new version, as the functionality is NOT VERY WELL TESTED. And then, if your passwords are lost, just restore the old file.
+You can also use it to create a version of the password database without the garbled entries. However, you must copy the result into the Chrome directory yourself. We strongly recommend that you BACK UP the password database (named `Login Data`) before overwriting it with the new version, as the functionality is NOT VERY WELL TESTED. And then, if your passwords are lost, just restore the old file.
 
 #### Prerequisites
 
