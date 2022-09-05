@@ -4,6 +4,7 @@
 __author__ = "Priyank Chheda"
 __email__  = "p.chheda29@gmail.com"
 
+from rich                import print
 from json                import load, dumps
 from string              import printable
 from getpass             import getuser
