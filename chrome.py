@@ -75,7 +75,7 @@ class ChromeMac:
         enc_passwd = enc_passwd[3:]
         cipher     = AES.new(self.master_key, AES.MODE_CBC, IV=initialization_vector)
         decrypted  = cipher.decrypt(enc_passwd)
-        return decrypted.strip().decode("utf8")
+        return decrypted.strip().decode(encoding="utf8", errors="ignore")
 
 class ChromeWin:
     def __init__(self, tmp_dir):
@@ -211,7 +211,7 @@ class ChromeLinux:
         enc_passwd = enc_passwd[3:]
         cipher     = AES.new(self.master_key, AES.MODE_CBC, IV=initialization_vector)
         decrypted  = cipher.decrypt(enc_passwd)
-        return decrypted.strip().decode("utf8")
+        return decrypted.strip().decode(encoding="utf8", errors="ignore")
 
 
 class Chrome:
