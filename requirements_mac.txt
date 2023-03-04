@@ -1,2 +1,0 @@
-SecretStorage==3.3.0
-pycrypto==2.6.1

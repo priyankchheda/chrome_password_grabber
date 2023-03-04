@@ -1,0 +1,7 @@
+setuptools
+wheel
+rich
+requests
+lxml
+pycryptodome
+SecretStorage

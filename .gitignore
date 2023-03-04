@@ -105,3 +105,6 @@ venv.bak/
 
 # Visual Studio Code
 .vscode
+
+/tmp
+*_Chrome.json
